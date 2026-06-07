@@ -1,0 +1,29 @@
+# Dipendenze
+node_modules/
+
+# Build e cache
+.next/
+out/
+build/
+dist/
+
+# Variabili d'ambiente (SEGRETI - non committare mai)
+.env
+.env.*
+!.env.example
+
+# Database e binari del vecchio sistema (legacy)
+*.db
+legacy/apps/pocketbase/pocketbase
+legacy/apps/pocketbase/pb_data/
+
+# File temporanei di Vite (legacy)
+*.timestamp-*.mjs
+
+# Log
+*.log
+npm-debug.log*
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
