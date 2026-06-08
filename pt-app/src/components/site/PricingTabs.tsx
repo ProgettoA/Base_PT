@@ -22,7 +22,7 @@ function BuyButton({ isAuthenticated, planId }: { isAuthenticated: boolean; plan
     return (
       <Link
         href="/login"
-        className="block w-full text-center py-4 text-lg font-bold rounded-md bg-white text-black hover:bg-gray-200 hover:text-[#ff8c42] transition-colors"
+        className="block w-full text-center py-3.5 text-base font-bold rounded-md bg-white text-black hover:bg-gray-200 hover:text-[#ff8c42] transition-colors"
       >
         Accedi per acquistare
       </Link>
@@ -46,7 +46,7 @@ function BuyButton({ isAuthenticated, planId }: { isAuthenticated: boolean; plan
       <button
         onClick={handleBuy}
         disabled={loading}
-        className="w-full py-4 text-lg font-bold rounded-md bg-white text-black hover:bg-gray-200 hover:text-[#ff8c42] disabled:opacity-60 transition-colors"
+        className="w-full py-3.5 text-base font-bold rounded-md bg-[#ff8c42] text-black hover:bg-[#ff7a2e] disabled:opacity-60 transition-colors"
       >
         {loading ? 'Reindirizzamento...' : 'Scegli Piano'}
       </button>
@@ -58,41 +58,33 @@ function BuyButton({ isAuthenticated, planId }: { isAuthenticated: boolean; plan
 function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: boolean }) {
   const klarnaEligible = plan.price >= 100
 
+  const features: string[] = []
+  if (plan.lessons_count) features.push(`${plan.lessons_count} Lezioni incluse`)
+  features.push(plan.online ? 'Allenamento dove vuoi' : 'Sessioni 1-to-1 in presenza')
+  features.push('Programma personalizzato')
+  features.push('Supporto dedicato')
+
   return (
-    <div className="flex flex-col p-6 rounded-2xl border border-gray-800 bg-[#222] hover:border-[#ff8c42] transition-all duration-300 h-full relative overflow-hidden">
-      {klarnaEligible && (
-        <div className="absolute top-0 right-0 bg-[#FFA8C5] text-black text-xs font-bold px-3 py-1 rounded-bl-lg flex items-center gap-1">
-          <BadgeCheck size={14} />
-          Pagabile con Klarna
-        </div>
-      )}
+    <div className="flex flex-col p-6 rounded-2xl border border-gray-800 bg-[#222] hover:border-[#ff8c42] hover:-translate-y-1 transition-all duration-300 h-full">
+      <h3 className="text-xl font-bold text-white leading-snug mb-5 min-h-[3.5rem]">{plan.description}</h3>
 
-      <div className="mb-6 pr-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#ff8c42] mb-1">
-          {plan.online ? 'Coaching Online' : 'One to One in presenza'}
-        </p>
-        <h3 className="text-xl font-bold text-white leading-snug">{plan.description}</h3>
+      <div className="mb-6 flex items-end gap-1">
+        <span className="text-4xl font-extrabold text-white">&euro;{Number(plan.price)}</span>
       </div>
 
-      <div className="mb-6">
-        <span className="text-3xl font-bold text-white">&euro;{Number(plan.price)}</span>
-      </div>
-
-      <ul className="space-y-3 mb-8 flex-1">
-        {plan.lessons_count ? (
-          <li className="flex items-start gap-3 text-gray-300">
+      <ul className="space-y-3 mb-6 flex-1">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-3 text-gray-300">
             <Check className="h-5 w-5 shrink-0 mt-0.5 text-[#ff8c42]" />
-            <span className="text-sm">{plan.lessons_count} Lezioni incluse</span>
+            <span className="text-sm">{f}</span>
           </li>
-        ) : null}
-        <li className="flex items-start gap-3 text-gray-300">
-          <Check className="h-5 w-5 shrink-0 mt-0.5 text-[#ff8c42]" />
-          <span className="text-sm">Modalit&agrave;: {plan.online ? 'Online' : 'In Presenza'}</span>
-        </li>
-        <li className="flex items-start gap-3 text-gray-300">
-          <Check className="h-5 w-5 shrink-0 mt-0.5 text-[#ff8c42]" />
-          <span className="text-sm">Supporto dedicato</span>
-        </li>
+        ))}
+        {klarnaEligible && (
+          <li className="flex items-start gap-3 text-gray-300">
+            <BadgeCheck className="h-5 w-5 shrink-0 mt-0.5 text-[#FFA8C5]" />
+            <span className="text-sm">Pagabile a rate con Klarna</span>
+          </li>
+        )}
       </ul>
 
       <div className="mt-auto">
