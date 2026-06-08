@@ -16,11 +16,21 @@ export const metadata: Metadata = {
   title: "Personal Trainer Pro | Francesco Vitucci",
   description:
     "Allenamenti personalizzati con Francesco Vitucci e visite osteopatiche. Prenota online il tuo percorso di benessere.",
+  icons: {
+    icon: "/favicon-32.png",
+    apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "PT Vitucci",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({

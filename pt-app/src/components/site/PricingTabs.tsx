@@ -75,12 +75,12 @@ function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: bool
         </div>
       )}
 
-      <h3 className="text-xl font-bold text-white leading-snug pt-6 pr-4 mb-5 min-h-[3.25rem]">
+      <h3 className="text-2xl font-bold text-white leading-snug pt-6 pr-4 mb-5 min-h-[3.75rem]">
         {plan.description}
       </h3>
 
       <div className="mb-6">
-        <span className="text-4xl font-extrabold text-white">&euro;{Number(plan.price)}</span>
+        <span className="text-3xl font-extrabold text-white">&euro;{Number(plan.price)}</span>
       </div>
 
       <ul className="space-y-3 mb-6 flex-1">
