@@ -73,7 +73,7 @@ function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: bool
       </div>
 
       <div className="mb-6">
-        <span className="text-3xl font-bold text-white">€{Number(plan.price)}</span>
+        <span className="text-3xl font-bold text-white">&euro;{Number(plan.price)}</span>
       </div>
 
       <ul className="space-y-3 mb-8 flex-1">
@@ -85,7 +85,7 @@ function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: bool
         ) : null}
         <li className="flex items-start gap-3 text-gray-300">
           <Check className="h-5 w-5 shrink-0 mt-0.5 text-[#ff8c42]" />
-          <span className="text-sm">Modalità: {plan.online ? 'Online' : 'In Presenza'}</span>
+          <span className="text-sm">Modalit&agrave;: {plan.online ? 'Online' : 'In Presenza'}</span>
         </li>
         <li className="flex items-start gap-3 text-gray-300">
           <Check className="h-5 w-5 shrink-0 mt-0.5 text-[#ff8c42]" />
@@ -116,21 +116,21 @@ export default function PricingTabs({
   const shown = tab === 'online' ? online : oneToOne
 
   const tabClass = (active: boolean) =>
-    `flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-full text-sm sm:text-base transition-all ${
+    `flex items-center justify-center gap-2 px-4 sm:px-8 py-3 rounded-full text-sm sm:text-base whitespace-nowrap transition-all ${
       active ? 'bg-[#ff8c42] text-white' : 'text-gray-400 hover:text-white'
     }`
 
   return (
     <div className="w-full">
       <div className="flex justify-center mb-12">
-        <div className="bg-[#2d2d2d] p-1.5 rounded-full border border-gray-700 flex gap-2">
+        <div className="bg-[#2d2d2d] p-1.5 rounded-full border border-gray-700 flex gap-2 max-w-full">
           <button className={tabClass(tab === 'onetoone')} onClick={() => setTab('onetoone')}>
             <UserCheck className="w-4 h-4 shrink-0" />
-            Coaching One to One
+            <span><span className="hidden sm:inline">Coaching </span>One to One</span>
           </button>
           <button className={tabClass(tab === 'online')} onClick={() => setTab('online')}>
             <Monitor className="w-4 h-4 shrink-0" />
-            Coaching Online
+            <span><span className="hidden sm:inline">Coaching </span>Online</span>
           </button>
         </div>
       </div>

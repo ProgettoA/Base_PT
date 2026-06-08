@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Monitor, UserCheck } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
+import { adminScope } from '@/utils/roles'
 import Header from '@/components/site/Header'
 import Footer from '@/components/site/Footer'
 import FadeIn from '@/components/site/FadeIn'
@@ -72,7 +73,7 @@ export default async function HomePage() {
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = profile?.role === 'admin'
+    isAdmin = adminScope(profile?.role).isAnyAdmin
   }
 
   return (
@@ -93,12 +94,12 @@ export default async function HomePage() {
           </div>
 
           <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-[fadeInUp_0.6s_ease-out]">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-[fadeInUp_0.6s_ease-out]">
               A piccoli passi si raggiungono grandi traguardi.
               <br />
               <span className="text-[#ff8c42]">Mai arrendersi!</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8">
               Allenamenti personalizzati con trainer professionista per arrivare ad essere la
               migliore versione di te stesso
             </p>
@@ -175,8 +176,8 @@ export default async function HomePage() {
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-200">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-200">
                         <h3 className="text-2xl font-bold mb-2">{member.name}</h3>
                         <p className="text-[#ff8c42] font-semibold mb-2">{member.specialty}</p>
                         <p className="text-sm text-gray-300 mb-3">{member.bio}</p>
@@ -267,7 +268,7 @@ export default async function HomePage() {
                 I risultati dei nostri clienti parlano da soli
               </p>
             </FadeIn>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {testimonials.map((t) => (
                 <FadeIn key={t.name}>
                   <div className="bg-[#1a1a1a] rounded-lg overflow-hidden border border-gray-800">
