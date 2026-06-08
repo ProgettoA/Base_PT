@@ -27,3 +27,8 @@ npm-debug.log*
 # Sistema operativo / editor
 .DS_Store
 Thumbs.db
+
+# File personali con credenziali (NON pubblicare)
+Utenti.txt
+Utenti e PWD.txt
+ROADMAP.md
