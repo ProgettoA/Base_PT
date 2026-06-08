@@ -78,11 +78,9 @@ export default async function AdminPage() {
   if (!scope.isAnyAdmin) redirect('/profile')
 
   // Carico SOLO i dati per i servizi che l'admin puo gestire (parallelo se entrambi).
-  let pt: Awaited<ReturnType<typeof fetchService>> | null = null
-  let osteo: Awaited<ReturnType<typeof fetchService>> | null = null
-  await Promise.all([
-    scope.canManagePt ? fetchService(supabase, 'pt').then((d) => { pt = d }) : Promise.resolve(),
-    scope.canManageOsteo ? fetchService(supabase, 'osteopath').then((d) => { osteo = d }) : Promise.resolve(),
+  const [pt, osteo] = await Promise.all([
+    scope.canManagePt ? fetchService(supabase, 'pt') : Promise.resolve(null),
+    scope.canManageOsteo ? fetchService(supabase, 'osteopath') : Promise.resolve(null),
   ])
 
   return (

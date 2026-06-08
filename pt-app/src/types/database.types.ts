@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -53,6 +53,7 @@ export type Database = {
           exception_date: string
           id: string
           is_closed: boolean
+          service: string
           time_slots: Json
           updated_at: string
         }
@@ -61,6 +62,7 @@ export type Database = {
           exception_date: string
           id?: string
           is_closed?: boolean
+          service?: string
           time_slots?: Json
           updated_at?: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           exception_date?: string
           id?: string
           is_closed?: boolean
+          service?: string
           time_slots?: Json
           updated_at?: string
         }
@@ -83,6 +86,8 @@ export type Database = {
           id: string
           notes: string | null
           number_of_clients: number
+          service: string
+          subscription_id: string | null
           time: string
           trainer_name: string | null
           updated_at: string
@@ -95,6 +100,8 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_clients?: number
+          service?: string
+          subscription_id?: string | null
           time: string
           trainer_name?: string | null
           updated_at?: string
@@ -107,6 +114,8 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_clients?: number
+          service?: string
+          subscription_id?: string | null
           time?: string
           trainer_name?: string | null
           updated_at?: string
@@ -117,6 +126,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -165,7 +181,7 @@ export type Database = {
           created_at: string
           id: string
           name: string | null
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
           surname: string | null
           updated_at: string
         }
@@ -173,7 +189,7 @@ export type Database = {
           created_at?: string
           id: string
           name?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           surname?: string | null
           updated_at?: string
         }
@@ -181,7 +197,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           surname?: string | null
           updated_at?: string
         }
@@ -249,6 +265,7 @@ export type Database = {
           created_at: string
           day_of_week: Database["public"]["Enums"]["day_of_week"]
           id: string
+          service: string
           time_slots: Json
           updated_at: string
         }
@@ -256,6 +273,7 @@ export type Database = {
           created_at?: string
           day_of_week: Database["public"]["Enums"]["day_of_week"]
           id?: string
+          service?: string
           time_slots?: Json
           updated_at?: string
         }
@@ -263,6 +281,7 @@ export type Database = {
           created_at?: string
           day_of_week?: Database["public"]["Enums"]["day_of_week"]
           id?: string
+          service?: string
           time_slots?: Json
           updated_at?: string
         }
@@ -274,6 +293,9 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      is_osteo_admin: { Args: never; Returns: boolean }
+      is_pt_admin: { Args: never; Returns: boolean }
+      is_superadmin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "client" | "admin"
@@ -415,6 +437,19 @@ export const Constants = {
     Enums: {
       app_role: ["client", "admin"],
       day_of_week: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      subscription_status: ["active", "cancelled", "expired"],
+    },
+  },
+} as const
+of_week: [
         "Monday",
         "Tuesday",
         "Wednesday",
