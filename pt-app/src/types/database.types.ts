@@ -449,16 +449,3 @@ export const Constants = {
     },
   },
 } as const
-of_week: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-      subscription_status: ["active", "cancelled", "expired"],
-    },
-  },
-} as const
