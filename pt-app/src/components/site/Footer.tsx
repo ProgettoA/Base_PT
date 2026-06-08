@@ -28,6 +28,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
+            <img src="/logo-icon.png" alt="Francesco Vitucci Personal Trainer" className="h-14 w-auto mb-4" />
             <h3 className="text-xl font-bold mb-4 text-[#ff8c42]">Personal Trainer Pro</h3>
             <p className="text-gray-400">
               Il tuo percorso verso il benessere inizia qui. Allenamenti personalizzati per

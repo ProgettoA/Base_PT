@@ -19,6 +19,9 @@ export default async function ResetPasswordPage({
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm space-y-4 rounded-2xl border border-gray-800 bg-[#222] p-8 text-center shadow-xl">
+          <Link href="/" className="mx-auto block w-fit">
+            <img src="/logo-full.png" alt="Francesco Vitucci Personal Trainer" className="h-24 w-auto" />
+          </Link>
           <h1 className="text-2xl font-bold text-white">Link non valido</h1>
           <p className="text-sm text-gray-400">
             Questo link di recupero &egrave; scaduto o non &egrave; valido. Richiedine uno nuovo.
@@ -37,6 +40,10 @@ export default async function ResetPasswordPage({
         action={updatePassword}
         className="w-full max-w-sm space-y-5 rounded-2xl border border-gray-800 bg-[#222] p-8 shadow-xl"
       >
+        <Link href="/" className="mx-auto block w-fit">
+          <img src="/logo-full.png" alt="Francesco Vitucci Personal Trainer" className="h-24 w-auto" />
+        </Link>
+
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-white">Nuova password</h1>
           <p className="text-sm text-gray-400">Scegli una nuova password (almeno 6 caratteri).</p>
