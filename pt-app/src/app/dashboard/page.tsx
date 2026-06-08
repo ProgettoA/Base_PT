@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { signout } from '@/app/login/actions'
+import { adminScope } from '@/utils/roles'
 
+export const dynamic = 'force-dynamic'
+
+// Questa pagina non mostra nulla: fa solo da "smistatore" dopo il login.
+// In base al ruolo manda gli admin all'area /admin e i clienti a /profile.
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -13,20 +17,10 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, surname, role')
+    .select('role')
     .eq('id', user.id)
     .single()
 
-  return (
-    <div className="mx-auto max-w-md space-y-4 p-8">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p>Ciao {profile?.name ?? user.email}!</p>
-      <p className="text-sm text-zinc-500">
-        Ruolo: <span className="font-medium">{profile?.role ?? '\u2014'}</span>
-      </p>
-      <form action={signout}>
-        <button className="rounded-md border px-4 py-2 text-sm hover:bg-zinc-50">Esci</button>
-      </form>
-    </div>
-  )
+  const scope = adminScope(profile?.role)
+  redirect(scope.isAnyAdmin ? '/admin' : '/profile')
 }
