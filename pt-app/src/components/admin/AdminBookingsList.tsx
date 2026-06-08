@@ -34,7 +34,29 @@ export default function AdminBookingsList({ bookings, emptyText }: { bookings: A
   return (
     <div>
       {err && <div className="rounded-md px-4 py-2 text-sm mb-3 bg-red-900/30 text-red-300 border border-red-800">{err}</div>}
-      <div className="bg-[#222] rounded-xl overflow-hidden border border-gray-800">
+
+      {/* Mobile: schede impilate */}
+      <div className="grid gap-3 md:hidden">
+        {bookings.map((b) => (
+          <div key={b.id} className="bg-[#222] border border-gray-800 rounded-lg p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-white font-semibold truncate">{b.clientName}</p>
+              <p className="text-gray-400 text-sm">{b.date} &middot; {b.time} &middot; {b.duration ?? 60} min</p>
+            </div>
+            <button
+              onClick={() => handleCancel(b.id)}
+              disabled={busyId === b.id}
+              className="shrink-0 text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-sm"
+            >
+              <Trash2 className="h-4 w-4" />
+              Annulla
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: tabella */}
+      <div className="hidden md:block bg-[#222] rounded-xl overflow-hidden border border-gray-800">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-black/30 border-b border-gray-800 text-gray-400">
