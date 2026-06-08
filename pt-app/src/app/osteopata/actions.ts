@@ -13,7 +13,8 @@ function toMin(t: string): number {
 export async function createOsteopathBooking(
   date: string,
   time: string,
-  duration: number
+  duration: number,
+  clientName?: string
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
   if (duration !== 30 && duration !== 60) return { error: 'Durata non valida.' }
@@ -29,6 +30,9 @@ export async function createOsteopathBooking(
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Devi essere autenticato per prenotare.' }
+
+  const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const isAdmin = !!prof?.role && ['admin', 'admin_pt', 'admin_osteopath', 'superadmin'].includes(prof.role)
 
   // Un utente non puo avere due appuntamenti sovrapposti (anche tra servizi diversi).
   const { data: userBookings } = await supabase
@@ -77,6 +81,7 @@ export async function createOsteopathBooking(
     number_of_clients: 1,
     subscription_id: null,
     service: 'osteopath',
+    notes: isAdmin && clientName && clientName.trim() ? clientName.trim().slice(0, 80) : null,
   })
   if (error) return { error: error.message }
 

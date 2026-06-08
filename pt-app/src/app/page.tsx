@@ -55,7 +55,7 @@ const testimonials = [
   },
 ]
 
-const WHATSAPP_NUMBER = '393331234567' // TODO: sostituire col numero reale del PT
+const WHATSAPP_NUMBER = '393516181741'
 const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   'Ciao! Vorrei maggiori informazioni sui vostri percorsi di allenamento.'
 )}`
@@ -67,18 +67,21 @@ export default async function HomePage() {
   } = await supabase.auth.getUser()
 
   let isAdmin = false
+  let isSuperadmin = false
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = adminScope(profile?.role).isAnyAdmin
+    const scope = adminScope(profile?.role)
+    isAdmin = scope.isAnyAdmin
+    isSuperadmin = scope.isSuperadmin
   }
 
   return (
     <>
-      <Header isAuthenticated={!!user} isAdmin={isAdmin} />
+      <Header isAuthenticated={!!user} isAdmin={isAdmin} isSuperadmin={isSuperadmin} />
 
       <main className="bg-[#1a1a1a]">
         {/* HERO */}

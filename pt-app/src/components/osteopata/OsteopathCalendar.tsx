@@ -44,11 +44,13 @@ export default function OsteopathCalendar({
   exceptions,
   allBookings,
   myBookings,
+  isAdmin,
 }: {
   weekly: Weekly[]
   exceptions: Exception[]
   allBookings: BookingLite[]
   myBookings: MyBooking[]
+  isAdmin: boolean
 }) {
   const router = useRouter()
   const [viewMonth, setViewMonth] = useState(() => {
@@ -58,6 +60,7 @@ export default function OsteopathCalendar({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [duration, setDuration] = useState<30 | 60>(60)
+  const [clientName, setClientName] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null)
 
@@ -131,7 +134,7 @@ export default function OsteopathCalendar({
     if (!selectedDate || !selectedTime) return
     setBusy(true)
     setMessage(null)
-    const res = await createOsteopathBooking(fmtDate(selectedDate), selectedTime, duration)
+    const res = await createOsteopathBooking(fmtDate(selectedDate), selectedTime, duration, isAdmin ? clientName.trim() || undefined : undefined)
     setBusy(false)
     if (res.error) {
       setMessage({ type: 'error', text: res.error })
@@ -139,6 +142,7 @@ export default function OsteopathCalendar({
       setMessage({ type: 'ok', text: 'Visita prenotata!' })
       setSelectedTime(null)
       setSelectedDate(null)
+      setClientName('')
       router.refresh()
     }
   }
@@ -300,16 +304,32 @@ export default function OsteopathCalendar({
               )}
 
               {selectedTime && (
-                <button
-                  onClick={handleBook}
-                  disabled={busy}
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-[#ff8c42] hover:bg-[#ff7a2e] disabled:opacity-60 text-white font-bold py-3 rounded-lg transition-colors"
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                  {busy
-                    ? 'Prenotazione...'
-                    : `Prenota ${selectedTime}-${toStr(toMin(selectedTime) + duration)} (${duration} min)`}
-                </button>
+                <div className="mt-6 space-y-3">
+                  {isAdmin && (
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-400">
+                        Nome cliente (prova gratuita, opzionale)
+                      </label>
+                      <input
+                        type="text"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        placeholder="Es. Mario Rossi"
+                        className="w-full rounded-lg border border-gray-700 bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:border-[#ff8c42] focus:outline-none"
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleBook}
+                    disabled={busy}
+                    className="w-full flex items-center justify-center gap-2 bg-[#ff8c42] hover:bg-[#ff7a2e] disabled:opacity-60 text-white font-bold py-3 rounded-lg transition-colors"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                    {busy
+                      ? 'Prenotazione...'
+                      : `Prenota ${selectedTime}-${toStr(toMin(selectedTime) + duration)} (${duration} min)`}
+                  </button>
+                </div>
               )}
             </>
           )}

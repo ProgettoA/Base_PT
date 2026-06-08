@@ -23,7 +23,10 @@ export default async function ProfilePage() {
     .select('name, role')
     .eq('id', user.id)
     .single()
-  const isAdmin = adminScope(profile?.role).isAnyAdmin
+  const scope = adminScope(profile?.role)
+  const isAdmin = scope.isAnyAdmin
+  // Gli admin di servizio (pt/osteo) non hanno una sezione profilo.
+  if (scope.isAnyAdmin && !scope.isSuperadmin) redirect('/admin')
 
   const { data: sub } = await supabase
     .from('subscriptions')
@@ -55,7 +58,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <Header isAuthenticated isAdmin={isAdmin} />
+      <Header isAuthenticated isAdmin={isAdmin} isSuperadmin={scope.isSuperadmin} />
       <main className="min-h-screen bg-[#1a1a1a] pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-5xl">
           {/* Intestazione */}

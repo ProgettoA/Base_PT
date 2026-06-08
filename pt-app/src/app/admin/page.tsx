@@ -15,6 +15,7 @@ type BookingRow = {
   time: string
   duration: number | null
   service: string
+  notes: string | null
   client: { name: string | null; surname: string | null } | null
 }
 
@@ -35,7 +36,7 @@ async function fetchService(
       .order('exception_date', { ascending: true }),
     supabase
       .from('bookings')
-      .select('id, date, time, duration, service, client:profiles(name, surname)')
+      .select('id, date, time, duration, service, notes, client:profiles(name, surname)')
       .eq('service', service)
       .gte('date', today)
       .order('date', { ascending: true })
@@ -57,7 +58,7 @@ async function fetchService(
     date: b.date,
     time: b.time,
     duration: b.duration,
-    clientName: [b.client?.name, b.client?.surname].filter(Boolean).join(' ') || '—',
+    clientName: (b.notes && b.notes.trim()) || [b.client?.name, b.client?.surname].filter(Boolean).join(' ') || '—',
   }))
   return { weekly: mappedWeekly, exceptions: mappedExceptions, bookings: mappedBookings }
 }
@@ -85,7 +86,7 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Header isAuthenticated isAdmin />
+      <Header isAuthenticated isAdmin isSuperadmin={scope.isSuperadmin} />
       <main className="min-h-screen bg-[#1a1a1a] pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-5xl">
           <h1 className="text-3xl font-bold text-white mb-1">Area Admin</h1>

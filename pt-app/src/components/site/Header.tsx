@@ -8,9 +8,10 @@ import { signout } from '@/app/login/actions'
 type HeaderProps = {
   isAuthenticated: boolean
   isAdmin: boolean
+  isSuperadmin?: boolean
 }
 
-export default function Header({ isAuthenticated, isAdmin }: HeaderProps) {
+export default function Header({ isAuthenticated, isAdmin, isSuperadmin = false }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -20,8 +21,11 @@ export default function Header({ isAuthenticated, isAdmin }: HeaderProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Admin di servizio: solo Admin. Superadmin e clienti: anche il Profilo.
+  const showAdmin = isAdmin
+  const showProfile = !isAdmin || isSuperadmin
+
   const navLinkClass = 'text-sm font-medium text-gray-300 transition-colors hover:text-[#ff8c42]'
-  const profileHref = isAdmin ? '/admin' : '/profile'
 
   const NavLinks = () => (
     <>
@@ -45,9 +49,9 @@ export default function Header({ isAuthenticated, isAdmin }: HeaderProps) {
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="group flex items-center flex-shrink-0">
             <img
-              src="https://horizons-cdn.hostinger.com/6e763bd8-0bca-4feb-b9d0-bbce0cc30bf6/f9d4f253f71d8872279537b9a90b7bba.png"
+              src="/logo-icon.png"
               alt="Francesco Vitucci Personal Trainer"
-              className="h-12 w-auto md:h-14 group-hover:scale-105 transition-transform duration-200"
+              className="h-11 w-auto md:h-14 transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_2px_10px_rgba(255,140,66,0.25)]"
             />
           </Link>
 
@@ -55,17 +59,25 @@ export default function Header({ isAuthenticated, isAdmin }: HeaderProps) {
             <NavLinks />
           </nav>
 
-          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+          <div className="hidden md:flex items-center gap-2 lg:gap-3">
             {isAuthenticated ? (
               <>
-                <Link
-                  href={profileHref}
-                  className={`px-4 py-2 rounded-md text-white hover:text-[#ff8c42] transition-colors ${
-                    isAdmin ? 'border border-gray-700' : ''
-                  }`}
-                >
-                  {isAdmin ? 'Admin' : 'Il mio Profilo'}
-                </Link>
+                {showAdmin && (
+                  <Link
+                    href="/admin"
+                    className="px-4 py-2 rounded-md text-white hover:text-[#ff8c42] border border-gray-700 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                )}
+                {showProfile && (
+                  <Link
+                    href="/profile"
+                    className="px-4 py-2 rounded-md text-white hover:text-[#ff8c42] transition-colors"
+                  >
+                    Il mio Profilo
+                  </Link>
+                )}
                 <form action={signout}>
                   <button
                     type="submit"
@@ -98,13 +110,24 @@ export default function Header({ isAuthenticated, isAdmin }: HeaderProps) {
           <div className="pt-4 border-t border-gray-800 flex flex-col gap-3">
             {isAuthenticated ? (
               <>
-                <Link
-                  href={profileHref}
-                  onClick={() => setOpen(false)}
-                  className="w-full text-center bg-[#ff8c42] text-black hover:bg-[#ff7a2e] font-bold px-4 py-2 rounded-md transition-colors"
-                >
-                  {isAdmin ? 'Admin Panel' : 'Il mio Profilo'}
-                </Link>
+                {showAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className="w-full text-center border border-gray-700 text-white hover:border-[#ff8c42] font-semibold px-4 py-2 rounded-md transition-colors"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                {showProfile && (
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="w-full text-center bg-[#ff8c42] text-black hover:bg-[#ff7a2e] font-bold px-4 py-2 rounded-md transition-colors"
+                  >
+                    Il mio Profilo
+                  </Link>
+                )}
                 <form action={signout}>
                   <button
                     type="submit"

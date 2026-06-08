@@ -15,6 +15,10 @@ export default async function LoginPage({
         action={login}
         className="w-full max-w-sm space-y-5 rounded-2xl border border-gray-800 bg-[#222] p-8 shadow-xl"
       >
+        <Link href="/" className="mx-auto block w-fit">
+          <img src="/logo-full.png" alt="Francesco Vitucci Personal Trainer" className="h-24 w-auto" />
+        </Link>
+
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-white">Accedi</h1>
           <p className="text-sm text-gray-400">Bentornato! Entra nella tua area.</p>

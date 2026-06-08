@@ -15,6 +15,7 @@ type MyBooking = { id: string; date: string; time: string; duration: number | nu
 type Props = {
   initialService: 'pt' | 'osteopath'
   canBookPt: boolean
+  isAdmin: boolean
   ptWeekly: Weekly[]
   ptExceptions: Exception[]
   osteoWeekly: Weekly[]
@@ -72,6 +73,7 @@ export default function CalendarTabs(props: Props) {
         </div>
       ) : service === 'pt' ? (
         <BookingCalendar
+          isAdmin={props.isAdmin}
           weekly={props.ptWeekly}
           exceptions={props.ptExceptions}
           allBookings={props.ptAllBookings}
@@ -79,6 +81,7 @@ export default function CalendarTabs(props: Props) {
         />
       ) : (
         <OsteopathCalendar
+          isAdmin={props.isAdmin}
           weekly={props.osteoWeekly}
           exceptions={props.osteoExceptions}
           allBookings={props.osteoAllBookings}

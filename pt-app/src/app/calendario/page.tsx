@@ -65,7 +65,7 @@ export default async function CalendarioPage({
 
   return (
     <>
-      <Header isAuthenticated isAdmin={scope.isAnyAdmin} />
+      <Header isAuthenticated isAdmin={scope.isAnyAdmin} isSuperadmin={scope.isSuperadmin} />
       <main className="min-h-screen bg-[#1a1a1a] pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-5xl">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Prenota una sessione</h1>
@@ -88,6 +88,7 @@ export default async function CalendarioPage({
           <CalendarTabs
             initialService={initialService}
             canBookPt={canBookPt}
+            isAdmin={scope.isAnyAdmin}
             ptWeekly={(ptWeekly ?? []) as never}
             ptExceptions={(ptExceptions ?? []) as never}
             osteoWeekly={(osteoWeekly ?? []) as never}

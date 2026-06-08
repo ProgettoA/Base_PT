@@ -19,7 +19,7 @@ export async function createCheckoutSession(
   // Prendo il piano dal database (prezzo affidabile lato server)
   const { data: plan } = await supabase
     .from('plans')
-    .select('id, description, stripe_amount_cents')
+    .select('id, description, stripe_amount_cents, plan_code')
     .eq('id', planId)
     .eq('active', true)
     .single()
@@ -33,9 +33,14 @@ export async function createCheckoutSession(
   const origin = `${proto}://${host}`
 
   try {
+    // Klarna disponibile solo per i piani NON mensili (trimestrali in su).
+    const isMonthly = /mensile/i.test(plan.description)
+    const paymentMethods: ('card' | 'klarna')[] = isMonthly ? ['card'] : ['card', 'klarna']
+
     const stripe = new Stripe(key)
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      payment_method_types: paymentMethods,
       line_items: [
         {
           price_data: {

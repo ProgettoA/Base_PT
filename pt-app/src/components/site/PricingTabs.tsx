@@ -56,7 +56,9 @@ function BuyButton({ isAuthenticated, planId }: { isAuthenticated: boolean; plan
 }
 
 function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: boolean }) {
-  const klarnaEligible = plan.price >= 100
+  // Klarna disponibile solo dai piani NON mensili (trimestrali in su).
+  const isMonthly = /mensile/i.test(plan.description)
+  const klarnaEligible = !isMonthly
 
   const features: string[] = []
   if (plan.lessons_count) features.push(`${plan.lessons_count} Lezioni incluse`)
@@ -65,10 +67,19 @@ function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: bool
   features.push('Supporto dedicato')
 
   return (
-    <div className="flex flex-col p-6 rounded-2xl border border-gray-800 bg-[#222] hover:border-[#ff8c42] hover:-translate-y-1 transition-all duration-300 h-full">
-      <h3 className="text-xl font-bold text-white leading-snug mb-5 min-h-[3.5rem]">{plan.description}</h3>
+    <div className="flex flex-col p-6 rounded-2xl border border-gray-800 bg-[#222] hover:border-[#ff8c42] hover:-translate-y-1 transition-all duration-300 h-full relative overflow-hidden">
+      {klarnaEligible && (
+        <div className="absolute top-0 right-0 bg-[#FFA8C5] text-black text-xs font-bold px-3 py-1 rounded-bl-lg flex items-center gap-1">
+          <BadgeCheck size={14} />
+          Pagabile con Klarna
+        </div>
+      )}
 
-      <div className="mb-6 flex items-end gap-1">
+      <h3 className="text-xl font-bold text-white leading-snug pt-6 pr-4 mb-5 min-h-[3.25rem]">
+        {plan.description}
+      </h3>
+
+      <div className="mb-6">
         <span className="text-4xl font-extrabold text-white">&euro;{Number(plan.price)}</span>
       </div>
 
@@ -79,12 +90,6 @@ function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: bool
             <span className="text-sm">{f}</span>
           </li>
         ))}
-        {klarnaEligible && (
-          <li className="flex items-start gap-3 text-gray-300">
-            <BadgeCheck className="h-5 w-5 shrink-0 mt-0.5 text-[#FFA8C5]" />
-            <span className="text-sm">Pagabile a rate con Klarna</span>
-          </li>
-        )}
       </ul>
 
       <div className="mt-auto">

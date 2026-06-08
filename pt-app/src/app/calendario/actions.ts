@@ -43,7 +43,8 @@ async function getActiveSubscription(
 export async function createBooking(
   date: string,
   time: string,
-  duration: number
+  duration: number,
+  clientName?: string
 ): Promise<{ error: string | null }> {
   const supabase = await createClient()
   if (duration !== 30 && duration !== 60) return { error: 'Durata non valida.' }
@@ -124,6 +125,7 @@ export async function createBooking(
     number_of_clients: 1,
     subscription_id: subscriptionId,
     service: 'pt',
+    notes: isAdmin && clientName && clientName.trim() ? clientName.trim().slice(0, 80) : null,
   })
   if (error) return { error: error.message }
 
