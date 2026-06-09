@@ -7,6 +7,7 @@ import ExceptionsEditor from '@/components/admin/ExceptionsEditor'
 import AdminBookingsList, { type AdminBooking } from '@/components/admin/AdminBookingsList'
 import AdminCalendar from '@/components/admin/AdminCalendar'
 import StatsDashboard from '@/components/admin/StatsDashboard'
+import ClientDetailModal from '@/components/admin/ClientDetailModal'
 import type { ClientRow } from '@/components/admin/ClientsTable'
 import type { Slot } from '@/app/admin/actions'
 import type { Service } from '@/utils/roles'
@@ -31,11 +32,11 @@ export default function ServiceAdminDashboard({
 }) {
   const [tab, setTab] = useState<Tab>('bookings')
   const [bookingView, setBookingView] = useState<'list' | 'calendar'>('calendar')
-  const [focusClientId, setFocusClientId] = useState<string | null>(null)
+  const [modalClient, setModalClient] = useState<ClientRow | null>(null)
 
   const goToClient = (id: string) => {
-    setFocusClientId(id)
-    setTab('stats')
+    const c = clients.find((x) => x.id === id)
+    if (c) setModalClient(c)
   }
 
   const today = new Date().toISOString().split('T')[0]
@@ -43,7 +44,7 @@ export default function ServiceAdminDashboard({
 
   const tabBtn = (id: Tab, label: string, Icon: typeof Calendar) => (
     <button
-      onClick={() => { setFocusClientId(null); setTab(id) }}
+      onClick={() => setTab(id)}
       className={`flex sm:flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
         tab === id ? 'bg-[#ff8c42] text-white' : 'text-gray-400 hover:text-white hover:bg-[#2d2d2d]'
       }`}
@@ -94,8 +95,14 @@ export default function ServiceAdminDashboard({
       {tab === 'weekly' && <WeeklyAvailabilityEditor service={service} initial={weekly} />}
       {tab === 'exceptions' && <ExceptionsEditor service={service} exceptions={exceptions} />}
       {tab === 'stats' && (
-        <StatsDashboard service={service} clients={clients} upcomingCount={upcoming.length} focusClientId={focusClientId} />
+        <StatsDashboard service={service} clients={clients} upcomingCount={upcoming.length} />
       )}
+
+      <ClientDetailModal
+        client={modalClient}
+        showSubscription={service === 'pt'}
+        onClose={() => setModalClient(null)}
+      />
     </div>
   )
 }
