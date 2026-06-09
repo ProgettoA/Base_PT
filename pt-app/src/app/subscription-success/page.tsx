@@ -2,11 +2,12 @@ import Stripe from 'stripe'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Clock } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
+import { adminScope } from '@/utils/roles'
 import Header from '@/components/site/Header'
 
 export const dynamic = 'force-dynamic'
 
-type Status = 'ok' | 'already' | 'pending' | 'error'
+type Status = 'ok' | 'pending' | 'error'
 
 export default async function SubscriptionSuccessPage({
   searchParams,
@@ -20,9 +21,12 @@ export default async function SubscriptionSuccessPage({
   } = await supabase.auth.getUser()
 
   let isAdmin = false
+  let isSuperadmin = false
   if (user) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    isAdmin = profile?.role === 'admin'
+    const scope = adminScope(profile?.role)
+    isAdmin = scope.isAnyAdmin
+    isSuperadmin = scope.isSuperadmin
   }
 
   let status: Status = 'error'
@@ -33,43 +37,53 @@ export default async function SubscriptionSuccessPage({
     try {
       const stripe = new Stripe(key)
       const session = await stripe.checkout.sessions.retrieve(session_id)
+      const planId = session.metadata?.planId
+      const today = new Date().toISOString().split('T')[0]
+      const customerId = typeof session.customer === 'string' ? session.customer : null
 
-      if (session.payment_status === 'paid') {
-        const planId = session.metadata?.planId
-        const userId = session.metadata?.userId
-
-        // Idempotenza: se l'abbonamento per questa sessione esiste gia, non duplico
-        const { data: existing } = await supabase
-          .from('subscriptions')
-          .select('id')
-          .eq('stripe_subscription_id', session.id)
-          .maybeSingle()
-
-        if (existing) {
-          status = 'already'
-        } else if (planId && userId === user.id) {
-          const today = new Date().toISOString().split('T')[0]
-          const { error } = await supabase.from('subscriptions').insert({
-            user_id: user.id,
-            plan_id: planId,
-            stripe_subscription_id: session.id,
-            status: 'active',
-            start_date: today,
-            payment_date: today,
-            lessons_used: 0,
-          })
-          if (error) {
-            status = 'error'
-            detail = error.message
-          } else {
-            status = 'ok'
-          }
+      if (session.payment_status === 'paid' && session.metadata?.userId === user.id && planId) {
+        // Registrazione idempotente (il webhook fa lo stesso, in modo affidabile).
+        if (session.mode === 'subscription' && session.subscription) {
+          const subId =
+            typeof session.subscription === 'string' ? session.subscription : session.subscription.id
+          const sub = await stripe.subscriptions.retrieve(subId)
+          const pe = sub.items?.data?.[0]?.current_period_end
+          await supabase.from('subscriptions').upsert(
+            {
+              user_id: user.id,
+              plan_id: planId,
+              stripe_subscription_id: sub.id,
+              stripe_customer_id: customerId,
+              status: 'active',
+              start_date: today,
+              payment_date: today,
+              end_date: pe ? new Date(pe * 1000).toISOString().split('T')[0] : null,
+              cancel_at_period_end: sub.cancel_at_period_end ?? false,
+              lessons_used: 0,
+            },
+            { onConflict: 'stripe_subscription_id' }
+          )
         } else {
-          status = 'error'
-          detail = 'Dati della sessione non validi.'
+          await supabase.from('subscriptions').upsert(
+            {
+              user_id: user.id,
+              plan_id: planId,
+              stripe_subscription_id: session.id,
+              stripe_customer_id: customerId,
+              status: 'active',
+              start_date: today,
+              payment_date: today,
+              lessons_used: 0,
+            },
+            { onConflict: 'stripe_subscription_id' }
+          )
         }
-      } else {
+        status = 'ok'
+      } else if (session.payment_status !== 'paid') {
         status = 'pending'
+      } else {
+        status = 'error'
+        detail = 'Dati della sessione non validi.'
       }
     } catch (e) {
       status = 'error'
@@ -79,21 +93,17 @@ export default async function SubscriptionSuccessPage({
 
   return (
     <>
-      <Header isAuthenticated={!!user} isAdmin={isAdmin} />
+      <Header isAuthenticated={!!user} isAdmin={isAdmin} isSuperadmin={isSuperadmin} />
       <main className="min-h-screen bg-[#1a1a1a] pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="bg-[#222] border border-gray-800 rounded-2xl p-8 max-w-md w-full text-center">
-          {status === 'ok' || status === 'already' ? (
+          {status === 'ok' ? (
             <>
               <CheckCircle2 className="h-16 w-16 text-green-400 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-white mb-2">Pagamento completato!</h1>
-              <p className="text-gray-400 mb-6">
-                {status === 'already'
-                  ? 'Il tuo abbonamento era già stato registrato.'
-                  : 'Il tuo abbonamento è attivo. Grazie!'}
-              </p>
+              <h1 className="text-2xl font-bold text-white mb-2">Abbonamento attivo!</h1>
+              <p className="text-gray-400 mb-6">Grazie! Il tuo abbonamento &egrave; attivo e si rinnover&agrave; automaticamente.</p>
               <Link
                 href="/calendario"
-                className="inline-block bg-[#ff8c42] hover:bg-[#ff7a2e] text-white font-bold px-6 py-3 rounded-md transition-colors"
+                className="inline-block bg-[#ff8c42] hover:bg-[#ff7a2e] text-black font-bold px-6 py-3 rounded-md transition-colors"
               >
                 Vai al calendario
               </Link>
@@ -102,16 +112,14 @@ export default async function SubscriptionSuccessPage({
             <>
               <Clock className="h-16 w-16 text-[#ff8c42] mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-white mb-2">Pagamento in elaborazione</h1>
-              <p className="text-gray-400 mb-6">
-                Il pagamento è in fase di elaborazione. Riceverai conferma a breve.
-              </p>
-              <Link href="/" className="text-[#ff8c42] underline">Torna alla home</Link>
+              <p className="text-gray-400 mb-6">Il pagamento &egrave; in fase di elaborazione. Riceverai conferma a breve.</p>
+              <Link href="/profile" className="text-[#ff8c42] underline">Vai al profilo</Link>
             </>
           ) : (
             <>
               <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-white mb-2">Qualcosa è andato storto</h1>
-              <p className="text-gray-400 mb-2">Non è stato possibile confermare il pagamento.</p>
+              <h1 className="text-2xl font-bold text-white mb-2">Qualcosa &egrave; andato storto</h1>
+              <p className="text-gray-400 mb-2">Non &egrave; stato possibile confermare il pagamento.</p>
               {detail && <p className="text-gray-600 text-xs mb-6">{detail}</p>}
               <Link href="/pricing" className="text-[#ff8c42] underline">Torna ai piani</Link>
             </>

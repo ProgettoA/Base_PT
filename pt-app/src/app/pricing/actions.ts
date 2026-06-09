@@ -4,6 +4,14 @@ import Stripe from 'stripe'
 import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
+// Intervallo di rinnovo dal nome del piano. null = acquisto singolo (Intensivo).
+function planInterval(description: string): { interval: 'month'; interval_count: number } | null {
+  // Solo i piani mensili si rinnovano. Gli altri sono acquisto singolo (con Klarna).
+  const d = description.toLowerCase()
+  if (d.includes('mensile')) return { interval: 'month', interval_count: 1 }
+  return null
+}
+
 export async function createCheckoutSession(
   planId: string
 ): Promise<{ url: string | null; error: string | null }> {
@@ -16,47 +24,45 @@ export async function createCheckoutSession(
   } = await supabase.auth.getUser()
   if (!user) return { url: null, error: 'Devi essere autenticato.' }
 
-  // Prendo il piano dal database (prezzo affidabile lato server)
   const { data: plan } = await supabase
     .from('plans')
-    .select('id, description, stripe_amount_cents, plan_code')
+    .select('id, description, stripe_amount_cents')
     .eq('id', planId)
     .eq('active', true)
     .single()
-
   if (!plan) return { url: null, error: 'Piano non trovato.' }
 
-  // Costruisco l'origine (http://localhost:3000 in locale, dominio in prod)
   const h = await headers()
-  const host = h.get('host')
-  const proto = h.get('x-forwarded-proto') ?? 'http'
+  const host = h.get('x-forwarded-host') ?? h.get('host')
+  const proto = h.get('x-forwarded-proto') ?? 'https'
   const origin = `${proto}://${host}`
 
-  try {
-    // Klarna disponibile solo per i piani NON mensili (trimestrali in su).
-    const isMonthly = /mensile/i.test(plan.description)
-    const paymentMethods: ('card' | 'klarna')[] = isMonthly ? ['card'] : ['card', 'klarna']
+  const interval = planInterval(plan.description)
 
+  try {
     const stripe = new Stripe(key)
+
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: paymentMethods,
+      mode: interval ? 'subscription' : 'payment',
+      payment_method_types: (interval ? ['card'] : ['card', 'klarna']) as ('card' | 'klarna')[],
+      customer_email: user.email ?? undefined,
       line_items: [
         {
           price_data: {
             currency: 'eur',
             product_data: { name: plan.description },
-            unit_amount: plan.stripe_amount_cents, // centesimi
+            unit_amount: plan.stripe_amount_cents,
+            ...(interval ? { recurring: interval } : {}),
           },
           quantity: 1,
         },
       ],
       success_url: `${origin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/subscription-cancel`,
-      metadata: {
-        userId: user.id,
-        planId: plan.id,
-      },
+      metadata: { userId: user.id, planId: plan.id },
+      ...(interval
+        ? { subscription_data: { metadata: { userId: user.id, planId: plan.id } } }
+        : {}),
     })
 
     return { url: session.url, error: null }

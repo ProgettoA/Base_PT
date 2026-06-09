@@ -208,11 +208,13 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          cancel_at_period_end: boolean
           lessons_used: number
           payment_date: string | null
           plan_id: string
           start_date: string
           status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
@@ -221,11 +223,13 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          cancel_at_period_end?: boolean
           lessons_used?: number
           payment_date?: string | null
           plan_id: string
           start_date?: string
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
@@ -234,11 +238,13 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          cancel_at_period_end?: boolean
           lessons_used?: number
           payment_date?: string | null
           plan_id?: string
           start_date?: string
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string

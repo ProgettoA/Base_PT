@@ -56,7 +56,7 @@ function BuyButton({ isAuthenticated, planId }: { isAuthenticated: boolean; plan
 }
 
 function PlanCard({ plan, isAuthenticated }: { plan: Plan; isAuthenticated: boolean }) {
-  // Klarna disponibile solo dai piani NON mensili (trimestrali in su).
+  // Klarna disponibile solo sui piani NON mensili (acquisto singolo).
   const isMonthly = /mensile/i.test(plan.description)
   const klarnaEligible = !isMonthly
 

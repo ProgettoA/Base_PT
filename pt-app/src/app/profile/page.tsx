@@ -6,6 +6,7 @@ import { adminScope } from '@/utils/roles'
 import { signout } from '@/app/login/actions'
 import Header from '@/components/site/Header'
 import ProfileFutureBookings from '@/components/profile/ProfileFutureBookings'
+import CancelRenewalButton from '@/components/profile/CancelRenewalButton'
 
 type Plan = { plan_code: string; lessons_count: number | null; description: string }
 
@@ -30,7 +31,7 @@ export default async function ProfilePage() {
 
   const { data: sub } = await supabase
     .from('subscriptions')
-    .select('id, status, start_date, lessons_used, plan:plans(plan_code, lessons_count, description)')
+    .select('id, status, start_date, end_date, cancel_at_period_end, stripe_subscription_id, lessons_used, plan:plans(plan_code, lessons_count, description)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -55,6 +56,9 @@ export default async function ProfilePage() {
 
   const lessonsIncluded = plan?.lessons_count ?? 0
   const lessonsRemaining = Math.max(0, lessonsIncluded - (sub?.lessons_used ?? 0))
+  const isRecurring = (sub?.stripe_subscription_id ?? '').startsWith('sub_')
+  const renewDate = sub?.end_date ? new Date(sub.end_date + 'T00:00:00').toLocaleDateString('it-IT') : null
+  const renewalCancelled = sub?.cancel_at_period_end === true
 
   return (
     <>
@@ -119,6 +123,28 @@ export default async function ProfilePage() {
                         : '—'}
                     </p>
                   </div>
+                </div>
+
+                <div className="p-6 pt-0 relative z-10">
+                  {isRecurring ? (
+                    renewalCancelled ? (
+                      <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-300">
+                        Rinnovo automatico annullato. L&apos;abbonamento resta attivo fino al{' '}
+                        <span className="font-semibold">{renewDate ?? '—'}</span>.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-gray-800 bg-[#0a0a0a] p-4">
+                        <p className="text-sm text-gray-300">
+                          Rinnovo automatico{renewDate ? <> il <span className="font-semibold text-white">{renewDate}</span></> : ''}.
+                        </p>
+                        <CancelRenewalButton />
+                      </div>
+                    )
+                  ) : (
+                    <div className="rounded-xl border border-gray-800 bg-[#0a0a0a] p-4 text-sm text-gray-400">
+                      Acquisto singolo (nessun rinnovo automatico).
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
