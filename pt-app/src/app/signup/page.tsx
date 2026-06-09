@@ -64,6 +64,19 @@ export default async function SignupPage({
         </div>
 
         <div className="space-y-1.5">
+          <label htmlFor="phone" className="text-sm font-medium text-gray-300">Telefono</label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            autoComplete="tel"
+            placeholder="+39 ..."
+            className="w-full rounded-md border border-gray-700 bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:border-[#ff8c42] focus:outline-none"
+          />
+        </div>
+
+        <div className="space-y-1.5">
           <label htmlFor="password" className="text-sm font-medium text-gray-300">Password</label>
           <PasswordInput id="password" name="password" minLength={6} autoComplete="new-password" />
         </div>

@@ -93,11 +93,10 @@ export default async function ProfilePage() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#ff8c42]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
                 <div className="p-6 border-b border-gray-800/80 relative z-10 flex flex-wrap items-center gap-3">
                   <Crown className="text-[#ff8c42] w-6 h-6" />
-                  <span className="text-2xl font-bold text-white">{plan!.plan_code}</span>
+                  <span className="text-2xl font-bold text-white">{plan!.description}</span>
                   <span className="bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/30 uppercase tracking-wider px-3 py-1 rounded-full text-xs font-bold">
                     Attivo
                   </span>
-                  <span className="text-gray-400 w-full md:w-auto md:ml-2 text-sm">{plan!.description}</span>
                 </div>
                 <div className="p-6 relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-[#0a0a0a] rounded-xl p-5 border border-gray-800">

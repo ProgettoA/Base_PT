@@ -4,6 +4,9 @@ import { adminScope, type Service } from '@/utils/roles'
 import Header from '@/components/site/Header'
 import ServiceAdminDashboard from '@/components/admin/ServiceAdminDashboard'
 import SuperadminDashboard from '@/components/admin/SuperadminDashboard'
+import StatsDashboard from '@/components/admin/StatsDashboard'
+import ClientsTable from '@/components/admin/ClientsTable'
+import { BarChart3 } from 'lucide-react'
 import type { Slot } from '@/app/admin/actions'
 import type { AdminBooking } from '@/components/admin/AdminBookingsList'
 
@@ -84,11 +87,31 @@ export default async function AdminPage() {
     scope.canManageOsteo ? fetchService(supabase, 'osteopath') : Promise.resolve(null),
   ])
 
+  // Statistiche + anagrafica clienti (superadmin e admin PT)
+  type ClientRow = {
+    id: string; name: string | null; surname: string | null; phone: string | null
+    email: string | null; created_at: string; plan_description: string | null
+    plan_price: number | null; is_recurring: boolean | null; sub_status: string | null; renew_date: string | null
+  }
+  let clients: ClientRow[] = []
+  if (scope.isSuperadmin || scope.canManagePt) {
+    const { data } = await supabase.rpc('admin_clients')
+    clients = (data ?? []) as ClientRow[]
+  }
+  const activeClients = clients.filter((c) => c.sub_status === 'active')
+  const revenue = activeClients.reduce((sum, c) => sum + Number(c.plan_price ?? 0), 0)
+  const recurringCount = activeClients.filter((c) => c.is_recurring).length
+  const planCounts = new Map<string, number>()
+  for (const c of activeClients) {
+    if (c.plan_description) planCounts.set(c.plan_description, (planCounts.get(c.plan_description) ?? 0) + 1)
+  }
+  const topPlans = [...planCounts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
+
   return (
     <>
       <Header isAuthenticated isAdmin isSuperadmin={scope.isSuperadmin} />
       <main className="min-h-screen bg-[#1a1a1a] pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-5xl">
+        <div className="container mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold text-white mb-1">Area Admin</h1>
           <p className="text-gray-400 mb-8">
             {scope.isSuperadmin
@@ -97,6 +120,25 @@ export default async function AdminPage() {
               ? 'Gestione del calendario Personal Trainer.'
               : 'Gestione del calendario Osteopata.'}
           </p>
+
+          {(scope.isSuperadmin || scope.canManagePt) && (
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <BarChart3 className="text-[#ff8c42]" />
+                Statistiche
+              </h2>
+              <StatsDashboard
+                totalClients={clients.length}
+                activeCount={activeClients.length}
+                revenue={revenue}
+                recurringCount={recurringCount}
+                singleCount={activeClients.length - recurringCount}
+                topPlans={topPlans}
+              />
+              <h3 className="text-xl font-bold text-white mt-10 mb-4">Anagrafica clienti</h3>
+              <ClientsTable clients={clients} />
+            </section>
+          )}
 
           {scope.isSuperadmin && pt && osteo ? (
             <SuperadminDashboard

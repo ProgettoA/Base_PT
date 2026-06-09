@@ -181,6 +181,7 @@ export type Database = {
           created_at: string
           id: string
           name: string | null
+          phone: string | null
           role: string
           surname: string | null
           updated_at: string
@@ -189,6 +190,7 @@ export type Database = {
           created_at?: string
           id: string
           name?: string | null
+          phone?: string | null
           role?: string
           surname?: string | null
           updated_at?: string
@@ -197,6 +199,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string | null
+          phone?: string | null
           role?: string
           surname?: string | null
           updated_at?: string
@@ -298,6 +301,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_clients: {
+        Args: never
+        Returns: {
+          id: string
+          name: string | null
+          surname: string | null
+          phone: string | null
+          email: string | null
+          created_at: string
+          plan_description: string | null
+          plan_price: number | null
+          is_recurring: boolean | null
+          sub_status: string | null
+          renew_date: string | null
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_osteo_admin: { Args: never; Returns: boolean }
       is_pt_admin: { Args: never; Returns: boolean }
