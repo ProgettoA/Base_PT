@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, Mail, Phone, Calendar, CreditCard, Repeat } from 'lucide-react'
 
 export type ClientRow = {
@@ -29,11 +29,20 @@ function fmt(d: string | null): string {
 export default function ClientsTable({
   clients,
   showSubscription = false,
+  focusId,
 }: {
   clients: ClientRow[]
   showSubscription?: boolean
+  focusId?: string | null
 }) {
   const [sel, setSel] = useState<ClientRow | null>(null)
+
+  useEffect(() => {
+    if (focusId) {
+      const c = clients.find((x) => x.id === focusId)
+      if (c) setSel(c)
+    }
+  }, [focusId, clients])
 
   if (clients.length === 0) return <p className="text-gray-500 italic">Nessun cliente registrato.</p>
 

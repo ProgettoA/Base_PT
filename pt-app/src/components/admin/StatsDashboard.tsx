@@ -87,10 +87,12 @@ export default function StatsDashboard({
   service,
   clients,
   upcomingCount,
+  focusClientId,
 }: {
   service: Service
   clients: ClientRow[]
   upcomingCount: number
+  focusClientId?: string | null
 }) {
   const activeClients = clients.filter((c) => c.sub_status === 'active')
   const recurringIncome = activeClients.filter((c) => c.is_recurring).reduce((s, c) => s + Number(c.plan_price ?? 0), 0)
@@ -110,7 +112,7 @@ export default function StatsDashboard({
         </div>
         <div>
           <h3 className="text-xl font-bold text-white mb-4">Anagrafica clienti</h3>
-          <ClientsTable clients={clients} />
+          <ClientsTable clients={clients} focusId={focusClientId} />
         </div>
       </div>
     )
@@ -132,7 +134,7 @@ export default function StatsDashboard({
 
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Anagrafica clienti</h3>
-        <ClientsTable clients={clients} showSubscription />
+        <ClientsTable clients={clients} showSubscription focusId={focusClientId} />
       </div>
     </div>
   )

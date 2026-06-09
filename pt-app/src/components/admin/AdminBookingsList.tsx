@@ -11,43 +11,56 @@ export type AdminBooking = {
   time: string
   duration: number | null
   clientName: string
+  clientId: string | null
 }
 
-export default function AdminBookingsList({ bookings, emptyText }: { bookings: AdminBooking[]; emptyText: string }) {
+export default function AdminBookingsList({
+  bookings,
+  emptyText,
+  onClientClick,
+}: {
+  bookings: AdminBooking[]
+  emptyText: string
+  onClientClick?: (id: string) => void
+}) {
   const router = useRouter()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
   const handleCancel = async (id: string) => {
     if (!window.confirm('Cancellare questa prenotazione?')) return
-    setBusyId(id); setErr(null)
+    setBusyId(id)
+    setErr(null)
     const res = await adminCancelBooking(id)
     setBusyId(null)
     if (res.error) setErr(res.error)
     else router.refresh()
   }
 
-  if (bookings.length === 0) {
-    return <p className="text-gray-500 italic">{emptyText}</p>
-  }
+  const clientCell = (b: AdminBooking) =>
+    b.clientId && onClientClick ? (
+      <button onClick={() => onClientClick(b.clientId as string)} className="text-[#ff8c42] hover:underline font-medium">
+        {b.clientName}
+      </button>
+    ) : (
+      <span className="text-white">{b.clientName}</span>
+    )
+
+  if (bookings.length === 0) return <p className="text-gray-500 italic">{emptyText}</p>
 
   return (
     <div>
       {err && <div className="rounded-md px-4 py-2 text-sm mb-3 bg-red-900/30 text-red-300 border border-red-800">{err}</div>}
 
-      {/* Mobile: schede impilate */}
+      {/* Mobile */}
       <div className="grid gap-3 md:hidden">
         {bookings.map((b) => (
           <div key={b.id} className="bg-[#222] border border-gray-800 rounded-lg p-4 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-white font-semibold truncate">{b.clientName}</p>
+              <div className="font-semibold truncate">{clientCell(b)}</div>
               <p className="text-gray-400 text-sm">{b.date} &middot; {b.time} &middot; {b.duration ?? 60} min</p>
             </div>
-            <button
-              onClick={() => handleCancel(b.id)}
-              disabled={busyId === b.id}
-              className="shrink-0 text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-sm"
-            >
+            <button onClick={() => handleCancel(b.id)} disabled={busyId === b.id} className="shrink-0 text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-sm">
               <Trash2 className="h-4 w-4" />
               Annulla
             </button>
@@ -55,7 +68,7 @@ export default function AdminBookingsList({ bookings, emptyText }: { bookings: A
         ))}
       </div>
 
-      {/* Desktop: tabella */}
+      {/* Desktop */}
       <div className="hidden md:block bg-[#222] rounded-xl overflow-hidden border border-gray-800">
         <table className="w-full text-sm">
           <thead>
@@ -73,13 +86,9 @@ export default function AdminBookingsList({ bookings, emptyText }: { bookings: A
                 <td className="py-3 px-5">{b.date}</td>
                 <td className="py-3 px-5">{b.time}</td>
                 <td className="py-3 px-5">{b.duration ?? 60} min</td>
-                <td className="py-3 px-5">{b.clientName}</td>
+                <td className="py-3 px-5">{clientCell(b)}</td>
                 <td className="py-3 px-5 text-right">
-                  <button
-                    onClick={() => handleCancel(b.id)}
-                    disabled={busyId === b.id}
-                    className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-sm"
-                  >
+                  <button onClick={() => handleCancel(b.id)} disabled={busyId === b.id} className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-sm">
                     <Trash2 className="h-4 w-4" />
                     Annulla
                   </button>

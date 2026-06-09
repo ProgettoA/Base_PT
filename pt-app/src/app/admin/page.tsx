@@ -17,6 +17,7 @@ type BookingRow = {
   duration: number | null
   service: string
   notes: string | null
+  client_id: string
   client: { name: string | null; surname: string | null } | null
 }
 
@@ -24,7 +25,6 @@ async function fetchService(
   supabase: Awaited<ReturnType<typeof createClient>>,
   service: Service
 ) {
-  const today = new Date().toISOString().split('T')[0]
   const [{ data: weekly }, { data: exceptions }, { data: bookings }] = await Promise.all([
     supabase
       .from('weekly_availability')
@@ -37,9 +37,8 @@ async function fetchService(
       .order('exception_date', { ascending: true }),
     supabase
       .from('bookings')
-      .select('id, date, time, duration, service, notes, client:profiles(name, surname)')
+      .select('id, date, time, duration, service, notes, client_id, client:profiles(name, surname)')
       .eq('service', service)
-      .gte('date', today)
       .order('date', { ascending: true })
       .order('time', { ascending: true }),
   ])
@@ -60,6 +59,7 @@ async function fetchService(
     time: b.time,
     duration: b.duration,
     clientName: (b.notes && b.notes.trim()) || [b.client?.name, b.client?.surname].filter(Boolean).join(' ') || '—',
+    clientId: (b.notes && b.notes.trim()) ? null : b.client_id,
   }))
   return { weekly: mappedWeekly, exceptions: mappedExceptions, bookings: mappedBookings }
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, CalendarX, ClipboardList, BarChart3 } from 'lucide-react'
+import { Calendar, CalendarX, ClipboardList, BarChart3, List, CalendarDays } from 'lucide-react'
 import WeeklyAvailabilityEditor from '@/components/admin/WeeklyAvailabilityEditor'
 import ExceptionsEditor from '@/components/admin/ExceptionsEditor'
 import AdminBookingsList, { type AdminBooking } from '@/components/admin/AdminBookingsList'
+import AdminCalendar from '@/components/admin/AdminCalendar'
 import StatsDashboard from '@/components/admin/StatsDashboard'
 import type { ClientRow } from '@/components/admin/ClientsTable'
 import type { Slot } from '@/app/admin/actions'
@@ -29,12 +30,34 @@ export default function ServiceAdminDashboard({
   clients: ClientRow[]
 }) {
   const [tab, setTab] = useState<Tab>('bookings')
+  const [bookingView, setBookingView] = useState<'list' | 'calendar'>('calendar')
+  const [focusClientId, setFocusClientId] = useState<string | null>(null)
+
+  const goToClient = (id: string) => {
+    setFocusClientId(id)
+    setTab('stats')
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+  const upcoming = bookings.filter((b) => b.date >= today)
 
   const tabBtn = (id: Tab, label: string, Icon: typeof Calendar) => (
     <button
-      onClick={() => setTab(id)}
+      onClick={() => { setFocusClientId(null); setTab(id) }}
       className={`flex sm:flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
         tab === id ? 'bg-[#ff8c42] text-white' : 'text-gray-400 hover:text-white hover:bg-[#2d2d2d]'
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+    </button>
+  )
+
+  const viewBtn = (id: 'list' | 'calendar', label: string, Icon: typeof List) => (
+    <button
+      onClick={() => setBookingView(id)}
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+        bookingView === id ? 'bg-[#ff8c42] text-white' : 'bg-[#1a1a1a] text-gray-400 hover:text-white border border-gray-700'
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -53,14 +76,26 @@ export default function ServiceAdminDashboard({
 
       {tab === 'bookings' && (
         <div>
-          <h3 className="text-xl font-bold text-white mb-4">Prossime Prenotazioni</h3>
-          <AdminBookingsList bookings={bookings} emptyText="Nessuna prenotazione in arrivo." />
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+            <h3 className="text-xl font-bold text-white">Prenotazioni</h3>
+            <div className="flex gap-2">
+              {viewBtn('calendar', 'Calendario', CalendarDays)}
+              {viewBtn('list', 'Lista', List)}
+            </div>
+          </div>
+          {bookingView === 'calendar' ? (
+            <AdminCalendar bookings={bookings} onClientClick={goToClient} />
+          ) : (
+            <AdminBookingsList bookings={upcoming} emptyText="Nessuna prenotazione in arrivo." onClientClick={goToClient} />
+          )}
         </div>
       )}
 
       {tab === 'weekly' && <WeeklyAvailabilityEditor service={service} initial={weekly} />}
       {tab === 'exceptions' && <ExceptionsEditor service={service} exceptions={exceptions} />}
-      {tab === 'stats' && <StatsDashboard service={service} clients={clients} upcomingCount={bookings.length} />}
+      {tab === 'stats' && (
+        <StatsDashboard service={service} clients={clients} upcomingCount={upcoming.length} focusClientId={focusClientId} />
+      )}
     </div>
   )
 }
