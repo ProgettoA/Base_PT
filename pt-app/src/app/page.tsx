@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Monitor, UserCheck } from 'lucide-react'
+import { Monitor, UserCheck, MapPin } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { adminScope } from '@/utils/roles'
 import Header from '@/components/site/Header'
@@ -309,6 +309,57 @@ export default async function HomePage() {
                 Scrivici su WhatsApp
               </a>
             </FadeIn>
+          </div>
+        </section>
+
+        {/* DOVE TROVARCI */}
+        <section className="py-20 bg-[#1a1a1a]">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-white">Dove trovarci</h2>
+            <p className="text-center text-gray-400 mb-10 max-w-2xl mx-auto">
+              Trovi Francesco in palestra a Sassuolo. Clicca sulla mappa per le indicazioni.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Via+Circonvallazione+N+Est+141%2C+41049+Sassuolo+MO"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-start gap-3 text-gray-200 hover:text-[#ff8c42] transition-colors"
+                >
+                  <MapPin className="h-7 w-7 text-[#ff8c42] shrink-0 mt-1" />
+                  <span className="text-lg leading-relaxed">
+                    Via Circonvallazione N Est 141
+                    <br />
+                    41049 Sassuolo (MO), Italia
+                  </span>
+                </a>
+                <div>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Via+Circonvallazione+N+Est+141%2C+41049+Sassuolo+MO"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-block bg-[#ff8c42] hover:bg-[#ff7a2e] text-black font-bold px-6 py-3 rounded-md transition-colors"
+                  >
+                    Apri in Google Maps
+                  </a>
+                </div>
+              </div>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Via+Circonvallazione+N+Est+141%2C+41049+Sassuolo+MO"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-2xl overflow-hidden border border-gray-800 hover:border-[#ff8c42] transition-colors"
+                aria-label="Apri la mappa su Google Maps"
+              >
+                <iframe
+                  title="Mappa - Francesco Vitucci Personal Trainer"
+                  src="https://www.google.com/maps?q=Via%20Circonvallazione%20N%20Est%20141%2C%2041049%20Sassuolo%20MO&output=embed"
+                  className="w-full h-64 pointer-events-none"
+                  loading="lazy"
+                />
+              </a>
+            </div>
           </div>
         </section>
       </main>

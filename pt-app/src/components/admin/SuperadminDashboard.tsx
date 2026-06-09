@@ -5,6 +5,7 @@ import { UserCheck, Stethoscope } from 'lucide-react'
 import ServiceAdminDashboard from '@/components/admin/ServiceAdminDashboard'
 import type { Slot } from '@/app/admin/actions'
 import type { AdminBooking } from '@/components/admin/AdminBookingsList'
+import type { ClientRow } from '@/components/admin/ClientsTable'
 
 type Weekly = { day_of_week: string; time_slots: Slot[] | null }
 type Exception = { id: string; exception_date: string; is_closed: boolean; time_slots: Slot[] | null }
@@ -12,9 +13,11 @@ type Exception = { id: string; exception_date: string; is_closed: boolean; time_
 export default function SuperadminDashboard({
   ptWeekly, ptExceptions, ptBookings,
   osteoWeekly, osteoExceptions, osteoBookings,
+  clients,
 }: {
   ptWeekly: Weekly[]; ptExceptions: Exception[]; ptBookings: AdminBooking[]
   osteoWeekly: Weekly[]; osteoExceptions: Exception[]; osteoBookings: AdminBooking[]
+  clients: ClientRow[]
 }) {
   const [service, setService] = useState<'pt' | 'osteopath'>('pt')
 
@@ -45,6 +48,7 @@ export default function SuperadminDashboard({
           weekly={ptWeekly}
           exceptions={ptExceptions}
           bookings={ptBookings}
+          clients={clients}
         />
       ) : (
         <ServiceAdminDashboard
@@ -52,6 +56,7 @@ export default function SuperadminDashboard({
           weekly={osteoWeekly}
           exceptions={osteoExceptions}
           bookings={osteoBookings}
+          clients={clients}
         />
       )}
     </div>

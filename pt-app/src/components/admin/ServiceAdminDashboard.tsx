@@ -1,35 +1,39 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, CalendarX, ClipboardList } from 'lucide-react'
+import { Calendar, CalendarX, ClipboardList, BarChart3 } from 'lucide-react'
 import WeeklyAvailabilityEditor from '@/components/admin/WeeklyAvailabilityEditor'
 import ExceptionsEditor from '@/components/admin/ExceptionsEditor'
 import AdminBookingsList, { type AdminBooking } from '@/components/admin/AdminBookingsList'
+import StatsDashboard from '@/components/admin/StatsDashboard'
+import type { ClientRow } from '@/components/admin/ClientsTable'
 import type { Slot } from '@/app/admin/actions'
 import type { Service } from '@/utils/roles'
 
 type Weekly = { day_of_week: string; time_slots: Slot[] | null }
 type Exception = { id: string; exception_date: string; is_closed: boolean; time_slots: Slot[] | null }
 
-type Tab = 'bookings' | 'weekly' | 'exceptions'
+type Tab = 'bookings' | 'weekly' | 'exceptions' | 'stats'
 
 export default function ServiceAdminDashboard({
   service,
   weekly,
   exceptions,
   bookings,
+  clients,
 }: {
   service: Service
   weekly: Weekly[]
   exceptions: Exception[]
   bookings: AdminBooking[]
+  clients: ClientRow[]
 }) {
   const [tab, setTab] = useState<Tab>('bookings')
 
   const tabBtn = (id: Tab, label: string, Icon: typeof Calendar) => (
     <button
       onClick={() => setTab(id)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+      className={`flex sm:flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
         tab === id ? 'bg-[#ff8c42] text-white' : 'text-gray-400 hover:text-white hover:bg-[#2d2d2d]'
       }`}
     >
@@ -44,6 +48,7 @@ export default function ServiceAdminDashboard({
         {tabBtn('bookings', 'Prenotazioni', ClipboardList)}
         {tabBtn('weekly', 'Disponibilità', Calendar)}
         {tabBtn('exceptions', 'Eccezioni', CalendarX)}
+        {tabBtn('stats', 'Statistiche', BarChart3)}
       </div>
 
       {tab === 'bookings' && (
@@ -54,8 +59,8 @@ export default function ServiceAdminDashboard({
       )}
 
       {tab === 'weekly' && <WeeklyAvailabilityEditor service={service} initial={weekly} />}
-
       {tab === 'exceptions' && <ExceptionsEditor service={service} exceptions={exceptions} />}
+      {tab === 'stats' && <StatsDashboard service={service} clients={clients} upcomingCount={bookings.length} />}
     </div>
   )
 }
